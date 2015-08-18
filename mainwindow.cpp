@@ -63,8 +63,11 @@ void MainWindow::on_search_clicked()
     //mostrar resultados
     //limpiar
     QLayoutItem *wItem;
-    while ((wItem = ui->resultsLayout->takeAt(0)) != 0)
-        delete wItem;
+
+    while ((wItem = ui->resultsLayout->takeAt(0)) != 0){
+         ui->resultsLayout->removeItem(wItem);
+         delete wItem;
+    }
     //mostrar
     foreach(QString match, matches){
         //show results

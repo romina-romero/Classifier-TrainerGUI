@@ -16,13 +16,15 @@ SOURCES +=  main.cpp\
             trainer.cpp \
     configurationwindow.cpp \
     classifier.cpp \
-    detector.cpp
+    detector.cpp \
+    test.cpp
 
 HEADERS  += mainwindow.h \
             trainer.h \
     configurationwindow.h \
     classifier.h \
-    detector.h
+    detector.h \
+    test.h
 
 FORMS    += mainwindow.ui \
     configurationwindow.ui

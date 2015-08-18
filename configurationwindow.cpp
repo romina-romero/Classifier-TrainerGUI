@@ -24,8 +24,10 @@ void ConfigurationWindow::updateClassLayout(){
     QString folder = settings.value("rootFolder",QVariant(".")).toString();
     //limpiar
     QLayoutItem *wItem;
-    while ((wItem = ui->classLayout->takeAt(0)) != 0)
-        delete wItem;
+    while ((wItem = ui->classLayout->takeAt(0)) != 0){
+        ui->classLayout->removeItem(wItem);
+        delete wItem;}
+
     //mostrar
     foreach(QString className, classifier->getClassesList()){
         //show results

@@ -42,23 +42,42 @@ void Trainer::load_images(const QString & directory, QVector<Mat> &img_lst )
 
 void Trainer::sample_neg(const Size & size){
     Rect box;
-    box.width = size.width;
-    box.height = size.height;
-
-    const int size_x = box.width;
-    const int size_y = box.height;
 
     srand( (unsigned int)time( NULL ) );
 
     QVector< Mat > full_neg;
 
     foreach(Mat img, negative_lst){
-        box.x = rand() % (img.cols - size_x);
-        box.y = rand() % (img.rows - size_y);
+
+        box.width = size.width;
+        box.height = size.height;
+
+        //if the picture is small
+        if(img.rows<size.height || img.cols<size.width){
+            box.width-=8; box.height-=8;
+        }
+        //small again
+        if(img.rows<size.height-8 || img.cols<size.width-8){
+            box.width-=8; box.height-=8;
+        }
+        //smaller, discard
+        if(img.rows<size.height-16 || img.cols<size.width-16){
+            qDebug() << "Warning: imagen descartada";
+            continue;
+        }
+
+        box.x = rand() % (img.cols - box.width-1);
+        box.y = rand() % (img.rows - box.height-1);
+
+       // qDebug() << "x" << box.x << "y" << box.y << "w" << img.cols << "h" << img.rows;
         Mat roi = img(box);
         full_neg.append(roi.clone());
     }
     negative_lst = full_neg;
+
+   // 0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows in function Mat
+
+
 }
 
 
@@ -84,8 +103,13 @@ void Trainer::compute_hog(const QVector< Mat > & img_lst, int label){
     foreach( Mat img, img_lst){
         cvtColor(img, gray, COLOR_BGR2GRAY);
         hog.compute(gray, descriptors, Size(8,8), Size(0,0),location);
+        if(descriptors.size()==0){
+            qDebug() << "Warning: no se pudo obtener descriptor" << label;
+            continue;
+        }
         gradient_lst.append(Mat(descriptors).clone());
         labels.append(label);
+
     }
 }
 
@@ -110,7 +134,7 @@ void Trainer::train( const QString & outputFilename){
     Mat trainData = Mat(rows, cols, CV_32FC1 );
 
     int i=0;
-    qDebug() << "generando vectores para entrenamiento";
+    qDebug() << "generando vectores para entrenamiento ";
     foreach(Mat gradient, gradient_lst){
         CV_Assert( gradient.cols == 1 || gradient.rows == 1 );
         if(gradient.cols == 1){
